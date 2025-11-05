@@ -3,9 +3,8 @@ package org.global.academy;
 import static spark.Spark.*;
 
 import com.google.gson.Gson;
-import java.nio.file.Paths;
-import java.nio.file.Path;
-import java.io.IOException;
+import java.util.Random;
+// removed unused imports (Paths, Path, IOException)
 
 public class Server {
     public static void main(String[] args) {
@@ -44,6 +43,13 @@ public class Server {
                 return gson.toJson(new ErrorResponse("Invalid credentials"));
             }
         });
+
+        // Simple random endpoint used by the welcome page (returns JSON with 1..13)
+        get("/random", (req, res) -> {
+            res.type("application/json");
+            int value = new Random().nextInt(13) + 1; // 1..13
+            return gson.toJson(new RandomResponse(value));
+        });
     }
     
     static class LoginRequest {
@@ -65,5 +71,10 @@ public class Server {
         ErrorResponse(String e) {
             error = e;
         }
+    }
+
+    static class RandomResponse {
+        int value;
+        RandomResponse(int v) { value = v; }
     }
 }

@@ -10,12 +10,28 @@
         .username { font-weight: bold; color: #0077cc; }
         button { padding: 8px 16px; background: #e74c3c; color: #fff; border: none; border-radius: 4px; cursor: pointer; }
         button:hover { background: #c0392b; }
+        /* card styles */
+        .card { width: 120px; height: 160px; border: 1px solid #333; border-radius: 8px; background: #fff; box-shadow: 0 2px 6px rgba(0,0,0,0.15); color: #e74c3c; display:flex; flex-direction:column; justify-content:space-between; padding:8px; box-sizing:border-box; font-family: 'Times New Roman', serif; }
+        .card .top, .card .bottom { font-size:18px; }
+        .card .center { font-size:56px; text-align:center; line-height:1; }
+        .suit { margin-left:6px; color:#e74c3c; }
+        .bottom { transform: rotate(180deg); text-align:right; }
     </style>
 </head>
 <body>
     <div class="container">
         <h2>Welcome, <span class="username" id="username"></span>!</h2>
-        <button onclick="logout()">Logout</button>
+        <p>
+        <div style="margin:8px 0 12px 0">
+            <!-- <button id="randomBtn">Draw a card</button> -->
+            <button onclick="logout()">Logout</button>
+        </div>
+
+        <!-- Card display area -->
+        <div id="randomOutput" style="width:100%; box-sizing:border-box; min-height:120px; display:flex; justify-content:center; align-items:center;">
+            <!-- Card will be inserted here -->
+        </div>
+
     </div>
     <script>
         // Assume username is stored in localStorage after login
@@ -24,6 +40,53 @@
             localStorage.removeItem('username');
             localStorage.removeItem('token');
             window.location.href = 'login.html';
+        }
+
+        // Fetch a random value from /random and show it in the textarea
+        async function fetchRandom() {
+            const out = document.getElementById('randomOutput');
+            out.value = 'Loading...';
+            try {
+                const resp = await fetch('/random');
+                if (!resp.ok) {
+                    out.value = 'Error: ' + resp.status + ' ' + resp.statusText;
+                    return;
+                }
+                // Server returns JSON; parse and render playing card (hearts)
+                const data = await resp.json();
+                if (data && typeof data.value !== 'undefined') {
+                    renderCard(data.value);
+                } else {
+                    out.textContent = 'Invalid response: ' + JSON.stringify(data);
+                }
+            } catch (e) {
+                out.textContent = 'Fetch failed: ' + e;
+            }
+        }
+
+        document.getElementById('randomBtn').addEventListener('click', fetchRandom);
+
+        // Render a playing card (hearts) into #randomOutput given a value 1..13
+        function renderCard(val) {
+            const out = document.getElementById('randomOutput');
+            // normalize
+            const v = Number(val) || 0;
+            if (v < 1 || v > 13) {
+                out.textContent = 'Value out of range: ' + val;
+                return;
+            }
+            const rank = (v === 1) ? 'A' : (v === 11) ? 'J' : (v === 12) ? 'Q' : (v === 13) ? 'K' : String(v);
+
+            // build card element
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.innerHTML = `
+                <div class="top">${rank}<span class="suit">&hearts;</span></div>
+                <div class="center">&hearts;</div>
+                <div class="bottom">${rank}<span class="suit">&hearts;</span></div>
+            `;
+            out.innerHTML = '';
+            out.appendChild(card);
         }
     </script>
 </body>
