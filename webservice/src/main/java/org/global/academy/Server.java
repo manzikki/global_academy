@@ -5,14 +5,23 @@ import static spark.Spark.*;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.google.gson.Gson;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 public class Server {
     private static final String JWT_SECRET = "verysecret";
+    private static List<Flashcard> flashcards = new ArrayList<>();
     
     public static void main(String[] args) {
         port(8080);
         staticFiles.location("/public");
+        
+        // Initialize flashcards
+        flashcards.add(new Flashcard("France", "Paris"));
+        flashcards.add(new Flashcard("Japan", "Tokyo"));
+        flashcards.add(new Flashcard("Brazil", "Brasília"));
+        
         // Simple CORS
         before((request, response) -> {
             response.header("Access-Control-Allow-Origin", "*");
@@ -82,6 +91,12 @@ public class Server {
             res.type("application/json");
             int value = new Random().nextInt(13) + 1;
             return gson.toJson(new RandomResponse(value));
+        });
+
+        get("/randflashcard", (req, res) -> {
+            res.type("application/json");
+            Flashcard card = flashcards.get(new Random().nextInt(flashcards.size()));
+            return gson.toJson(card);
         });
     }
     
