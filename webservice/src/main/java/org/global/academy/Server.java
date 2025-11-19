@@ -12,6 +12,7 @@ import java.util.Random;
 public class Server {
     private static final String JWT_SECRET = "verysecret";
     private static List<Flashcard> flashcards = new ArrayList<>();
+    private static Stock appleStock;
     
     public static void main(String[] args) {
         port(8080);
@@ -21,6 +22,9 @@ public class Server {
         flashcards.add(new Flashcard("France", "Paris"));
         flashcards.add(new Flashcard("Japan", "Tokyo"));
         flashcards.add(new Flashcard("Brazil", "Brasília"));
+        
+        // Initialize Apple stock
+        appleStock = new Stock("Apple", "AAPL", "NASDAQ", 150.25);
         
         // Simple CORS
         before((request, response) -> {
@@ -97,6 +101,11 @@ public class Server {
             res.type("application/json");
             Flashcard card = flashcards.get(new Random().nextInt(flashcards.size()));
             return gson.toJson(card);
+        });
+
+        get("/applestock", (req, res) -> {
+            res.type("application/json");
+            return gson.toJson(appleStock);
         });
     }
     
