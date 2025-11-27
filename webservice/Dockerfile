@@ -7,11 +7,11 @@ COPY pom.xml mvnw* ./
 COPY .mvn .mvn
 
 # Pre-download dependencies (faster rebuilds)
-RUN mvnw -q dependency:go-offline
+RUN mvn -q dependency:go-offline
 
 # Copy source and build jar
 COPY src src
-RUN mvnw clean package -DskipTests
+RUN mvn clean package -DskipTests
 
 # 2) Runtime stage: minimal JRE image
 FROM eclipse-temurin:21-jre
